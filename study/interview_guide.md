@@ -69,3 +69,5 @@
    - 设计一个 App 启动框架
    - 设计一个长连接保活方案
    - 设计一个跨平台通信桥
+
+### https://github.com/zhpanvip/AndroidNote
