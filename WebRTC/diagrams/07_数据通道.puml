@@ -1,0 +1,35 @@
+@startuml 07_数据通道
+title 数据通道 (业务 + 心跳)
+
+skinparam componentStyle rectangle
+
+package "DataChannelHandler (id=0 ordered)" {
+  [createDataChannel] as DC1
+  [onState → onDataChannelState] as DC2
+  [onMessage → onChannelMessage] as DC3
+  [sendDataChannelMessage] as DC4
+  [state=Open? 是→send / 否→丢弃并日志] as DC5
+
+  DC1 --> DC2
+  DC1 --> DC3
+  DC4 --> DC5
+}
+
+package "KeepAliveChannel (id=1 unordered)" {
+  [createDataChannel] as K1
+  [onOpen → 2s 定时心跳] as K2
+  [_sendHeartbeat\n_issuelessStat++] as K3
+  [≥10 触发 onHeartbeatTimeout\n→ DisConnected(OTHER)] as K5
+  [≥3 onStartLoading 显示加载] as K6
+  [=0 onEndLoading 隐藏加载] as K7
+  [收到对端心跳 → _issuelessStat=0] as K8
+  [id<0 → _replyHeartbeat] as K9
+
+  K1 --> K2
+  K2 --> K3
+  K3 --> K5
+  K3 --> K6
+  K3 --> K7
+  K8 --> K9
+}
+@enduml

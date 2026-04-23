@@ -1,0 +1,173 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+
+'[-> A: DoWork
+'
+'activate A
+'
+'A -> A: Internal call
+'activate A
+'
+'A ->] : << createRequest >>
+'
+'A<--] : RequestCreated
+'deactivate A
+'[<- A: Done
+'deactivate A
+
+participant  SwiftStone as A
+participant  定时器 as X
+participant  ATOTO_SERVER as B
+participant  Janus_SERVER as C
+participant  车机客户端 as D
+
+!pragma teoz true
+skinparam sequenceMessageAlign left
+skinparam responseMessageAlign right
+
+'SART
+ref over A,  B, C, D : init
+
+autonumber
+group 一、发起通话
+activate A
+A -> B++: 发起视频通话：/vedioCall?forceNewToken=false
+B -> B: 检查是否有车机的权限，没有则返回错误
+B -> X: 注册定时器，设置状态为0
+X -> D: 状态是0，则唤醒车机
+||50||
+loop 每隔10秒检查一次
+X -> X: 是否距离上次的\n活跃时间超过1分钟
+alt 超时
+    X -> A: timeout
+else #lightyellow 未超时
+    alt 状态==0
+    X -> D: 唤醒车机
+    X -> X: 更新活跃时间
+    end
+    alt 状态 <> 2
+        X -> A: pedding
+    else 状态 == 2
+    X -> X: 删除定时器
+    end alt
+end alt
+end loop
+||50||
+
+D -> B++#FFBBBB: 唤醒成功，调用：/wakeUp
+B -> X: 设置状态为1，更新活跃时间
+X -> B: 是否设置成功，超时、未初始化、\n状态已经为1，则返回false
+alt 上一步结果为false
+    alt 状态已经为1
+        B -> D: ignore
+        D -> D: STOP
+    end
+    alt 未初始化
+        B -> D: 未初始化
+        D -> B: 休眠一段时间后，调用：/wakeUp
+    end
+    alt 超时
+        B -> D: timeout
+        D -> D: STOP
+    end
+else #lightyellow 未超时
+B -> B: forceNewToken 或  \n  车机没有token 或 token过期
+    alt YES
+    B -> C: admin/token/delete 删除已过期的token
+    C -> B: ok
+    B -> B: 生成这次会话token
+    B -> C: admin/token/add 注册token
+    C -> B: ok
+    else NO
+    B -> B: 使用已存在的token
+    end alt
+B -> B: 生成随机用户名：rand_user2
+B -> D--: rand_user2, token
+
+
+
+D -> C: wss:// create
+C -> D: session_id
+D -> C: attach
+C -> D: handle_id
+D -> C: register rand_user2
+C -> D: ok
+D -> B++#FFBBBB: /registerOK
+B -> X: 设置状态为2
+X -> B: 是否更新成功，超时则false
+alt 上一步结果为false
+B -> D: timeout
+D -> C: 删除会话
+C-> D: ok
+else true:未超时
+B -> B: 生成随机用户名：rand_user1
+B -> D--: wait incoming call
+B -> A--: rand_user1, rand_user2, token
+
+
+D -> D++: 等待被呼叫
+deactivate A
+end alt
+
+
+A -> C: wss:// create
+C -> A: session_id
+A -> C: attach
+C -> A: handle_id
+A -> C: register rand_user1
+A -> C: register
+C -> A: ok
+
+A -> A: 收集sdp
+A -> C: call:rand_user2(offer)(trickle candidate)
+C -> A: calling
+C -> D: incomingcall:rand_user1
+deactivate D
+D -> D: 收集sdp
+D -> C: accept(trickle candidate)
+
+C -> D: accepted:rand_user1
+C -> A: accepted:rand_user2(answer,trickle candidate)
+end alt
+
+alt 在以上阶段与Janus_SERVER交互时候，token可能过被清掉
+A -> C: wss://xxx.com/janus
+C -> A: error:code=403
+A -> C: close session(session_id)
+C -> A: ok
+A -> B: 重新发起视频通话：/vedioCall?forceNewToken=true
+end alt
+
+alt 在以上阶段与Janus_SERVER交互时候，token可能过被清掉
+D -> C: wss://xxx.com/janus
+C -> D: error:code=403
+D -> C: close session(session_id)
+C -> D: ok
+end alt
+end group
+
+||100||
+
+autonumber
+group 二、建立媒体流链接
+A <-> D: 执行ice 确定使用P2P,还是RELAY
+A <-> D: 传输音视频数据
+end group
+
+||100||
+autonumber
+group 三、结束通话
+A -> C: hangup
+alt token过期
+C -> A: error:code=403
+A -> C: close session((session_id)
+C -> A: ok
+else token未过期
+C -> C: 销毁会话
+C -> D: hangup
+C -> A: hangup
+end group
+@enduml

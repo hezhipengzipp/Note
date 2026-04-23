@@ -1,0 +1,27 @@
+@startuml 04.1_SSE成功数据处理
+title _handleSuccessSseData 分支
+
+start
+if (wakeUpStatus == STATUS_PHONE_CALLING?) then (是)
+  :DisConnected(PHONE_CALLING);
+  stop
+else (否)
+  :保存 localName / remoteName;
+  :设置 wss / token / hashId;
+  :connId / cameraId 写入 RtcInit;
+  :_addStubTrack;
+  switch (status)
+  case ( STATUS_WAKE_UP 首次 )
+    :_remoteWakeup=true;
+    :sendTask(JanusConnect);
+  case ( STATUS_REGISTERED )
+    if (_localRegistered?) then (是)
+      :sendTask(JanusCall);
+    else (否 且 未唤醒)
+      :_remoteWakeup=true;
+      :sendTask(JanusConnect);
+    endif
+  endswitch
+endif
+stop
+@enduml

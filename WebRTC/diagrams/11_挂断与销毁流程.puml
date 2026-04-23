@@ -1,0 +1,38 @@
+@startuml 11_挂断与销毁流程
+title 挂断与销毁流程
+
+autonumber
+actor User
+participant "RtcInit" as Rtc
+participant "UseCase" as UC
+participant "JanusClient" as JC
+participant "Janus" as J
+participant "PeerConnection" as PC
+participant "HttpEngin" as H
+
+User -> Rtc : close(reason) / hangup
+
+alt hangup
+  Rtc -> UC : hangup
+  UC -> JC : hangup(handleId)
+  JC -> J : message{hangup}
+end
+
+alt close
+  Rtc -> UC : onDestroy(reason)
+  UC -> UC : _isClose=true\nEventFlux.disconnect
+  UC -> UC : cancel Calling/Webrtc Timer
+  UC -> H : hangup(connId, deviceId, reason)
+  UC -> PC : close + dispose renderers
+  UC -> JC : destroySession
+  JC -> J : destroy
+  UC -> JC : disConnect (WS close)
+  UC -> UC : KeepAliveChannel.close\nDataChannel.close
+end
+
+J --> JC : HANGUP 事件
+JC -> UC : onHangup → _handleWebrtcHangup
+UC -> H : queryDeviceAcceptStatus
+H --> UC : status
+UC --> Rtc : DisConnected(status/USER_REFUSE/OTHER)
+@enduml

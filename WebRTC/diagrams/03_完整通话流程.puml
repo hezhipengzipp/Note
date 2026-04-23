@@ -1,0 +1,110 @@
+@startuml 03_完整通话流程
+title 视频通话全景时序（按阶段分组）
+
+autonumber
+actor "调用方" as User
+participant "RtcInit" as Rtc
+participant "UseCase" as UC
+participant "SSE Server" as SSE
+participant "JanusClient" as JC
+participant "WebSocket" as WS
+participant "Janus Server" as Janus
+participant "PeerConnection" as PC
+participant "对端车机" as Peer
+
+== 阶段 ① 呼叫发起：SSE 唤醒 ==
+group ① SSE 唤醒（获取 Janus 连接参数）
+  User -> Rtc : videoCall(cameraId)
+  Rtc -> UC : requestVideoCall
+  UC -> SSE : GET sseUrl?devicesUniqueId&forceNewToken
+  note right of UC : Authorization 头 + cameraId
+  SSE --> UC : STATUS_WAKE_UP\n(token, wss, randUser, hashId)
+  UC -> UC : _remoteWakeup=true\n_addStubTrack
+end
+
+== 阶段 ② Janus 会话建立 ==
+group ② 建立 Janus Session（WebSocket + create）
+  UC -> JC : sendTask(JanusConnect)
+  JC -> WS : connect(wssUrl + hashId)
+  WS --> JC : onOpen
+  JC -> Janus : create (token)
+  Janus --> JC : sessionId
+  JC -> JC : startKeepAliveTimer(10s)
+  JC -> UC : onCreateSession
+end
+
+== 阶段 ③ 插件绑定与用户注册 ==
+group ③ attach videocall 插件 + 注册用户名
+  UC -> JC : attachPlugin(videocall)
+  JC -> Janus : attach
+  Janus --> JC : handleId
+  JC -> UC : onAttached(handleId)
+  UC --> Rtc : JanusInitialized
+  UC -> JC : registerUser(localName)
+  JC -> Janus : message{register}
+  Janus --> JC : EVENT{registered}
+  JC -> UC : handleVideoCallEvent(REGISTERED)
+  UC --> Rtc : RegisteredEvent
+  UC -> UC : _localRegistered=true
+end
+
+== 阶段 ④ 对端就绪 → 发起 WebRTC 协商 ==
+group ④ SSE 通知对端注册 + 发 SDP Offer
+  SSE --> UC : STATUS_REGISTERED\n(对端已注册)
+  UC -> UC : _remoteRegistered=true
+  UC -> UC : sendTask(JanusCall)
+  UC -> PC : createOffer
+  PC --> UC : sdp(offer)
+  UC -> PC : setLocalDescription
+  UC -> JC : call(handleId, offer, remoteName)
+  JC -> Janus : message{call + jsep}
+  Janus --> JC : EVENT{calling}
+  UC --> Rtc : InCallingEvent
+  UC -> UC : _startCallingTimeoutTask
+  note right of UC : accOn=true → 35s\naccOn=false → 15s
+end
+
+== 阶段 ⑤ ICE Candidate 持续交换 ==
+group ⑤ Trickle ICE（打洞候选逐条上报）
+  PC -> JC : onIceCandidate (逐个)
+  JC -> Janus : trickle(candidate)
+  PC -> JC : onIceGatheringState=Complete
+  JC -> Janus : trickle{completed:true}
+end
+
+== 阶段 ⑥ 对端接听 → SDP Answer ==
+group ⑥ 对端 accept 并返回 answer
+  Janus --> Peer : incomingcall:randUser1
+  Peer --> Janus : accept + jsep(answer)
+  Janus --> JC : EVENT{accepted} + jsep
+  JC -> UC : handleVideoCallEvent(ACCEPTED)
+  UC -> UC : _cancelCallingTimeoutTask
+  UC -> PC : setRemoteDescription(answer)
+  UC --> Rtc : Connecting
+  UC -> UC : _startWebrtcTimeoutTask(8s)
+end
+
+== 阶段 ⑦ 媒体通道建立 ==
+group ⑦ ICE 协商 + 远端流到达 + webrtcup
+  PC -> PC : ICE 协商 (P2P / RELAY)
+  PC --> UC : onTrack (video/audio)
+  UC -> UC : remoteVideoMap[streamId]=Renderer
+  UC --> Rtc : StreamOpen(streamId)
+  Janus --> JC : webrtcup
+  JC -> UC : onWebRTC
+  UC --> Rtc : Connected(cameraId)
+  Janus --> JC : media{receiving:true}
+  JC -> UC : onMedia
+  UC -> UC : _cancelWebrtcTimeoutTask
+end
+
+== 阶段 ⑧ 通话进行中 ==
+group ⑧ DataChannel 业务消息 + KeepAlive 心跳
+  note over UC, Peer
+    · 业务 DataChannel（id=0, ordered）收发麦克风状态等消息
+    · KeepAliveChannel（id=1, unordered）每 2s 心跳
+    · 连续 10 次无应答 → 判 DisConnected(OTHER)
+    · Janus Session 每 10s 发 keepalive 防回收
+  end note
+end
+@enduml

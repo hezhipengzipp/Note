@@ -1,0 +1,37 @@
+@startuml 06_WebRTC媒体协商
+title WebRTC Offer/Answer + Trickle ICE
+
+autonumber
+participant "UseCase" as UC
+participant "PeerConnection" as PC
+participant "JanusClient" as JC
+participant "Janus" as J
+
+UC -> PC : createOffer(OFFER_CONSTRAINTS)
+PC --> UC : sdp(offer)
+UC -> PC : setLocalDescription(offer)
+UC -> JC : call(handleId, offer, remoteName)
+JC -> J : message{call + jsep}
+
+loop 每个候选
+  PC --> UC : onIceCandidate(candidate)
+  UC -> JC : trickleCandidate
+  JC -> J : trickle{candidate}
+end
+
+PC --> UC : onIceGatheringState=Complete
+UC -> JC : trickleCandidateComplete
+JC -> J : trickle{completed:true}
+
+J --> JC : EVENT{accepted} + jsep(answer)
+JC -> UC : handleVideoCallEvent(ACCEPTED)
+UC -> PC : setRemoteDescription(answer)
+UC -> UC : startWebrtcTimeoutTask(8s)
+
+PC -> PC : ICE 协商
+PC --> UC : onTrack video\n新 RTCVideoRenderer\n存入 remoteVideoMap
+PC --> UC : onTrack audio\nremoteAudio.srcObject
+
+J --> JC : webrtcup → Connected
+J --> JC : media receiving:true\ncancelWebrtcTimeout
+@enduml

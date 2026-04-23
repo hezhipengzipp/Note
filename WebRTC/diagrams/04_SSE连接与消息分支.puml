@@ -1,0 +1,45 @@
+@startuml 04_SSE连接与消息分支
+title SSE 连接建立与消息分支处理
+
+start
+:requestVideoCall;
+:_startSSEConnect\n最多 5 次重试;
+:EventFlux.connect;
+
+if (连接结果?) then (onError)
+  if (statusCode?) then (200)
+    :_attemptSSEReconnect\n延迟 3s + attempts--;
+    detach
+  else (其它)
+    :DisConnected(OTHER, SSE Fail:code);
+    stop
+  endif
+elseif () then (onConnectionClose)
+  :延迟 500ms;
+  if (connId 为空?) then (是)
+    :DisConnected(OTHER, SSE Close);
+    stop
+  else (否)
+    :忽略, 后续 Janus 流程进行中;
+    stop
+  endif
+else (onData)
+  :_parseSseData;
+endif
+
+switch (callData.code)
+case ( SSE_SUCCESS )
+  :_handleSuccessSseData;
+case ( SSE_TIMEOUT )
+  if (已唤醒?) then (是)
+    :DisConnected(INIT_FAILURE);
+  else (否)
+    :DisConnected(CALLEE_OFFLINE);
+  endif
+case ( USER_HANGUP )
+  :DisConnected(USER_REFUSE);
+case ( 其它错误码\nDEVICE_TOKEN_EXPIRED\nSSE_UNAUTHORIZED\nWAITING_TIMEOUT\nANSWER_TIMEOUT\nWEBRTC_HANGUP\nSSE_FAILED\nOTHER )
+  :DisConnected(原始 code);
+endswitch
+stop
+@enduml

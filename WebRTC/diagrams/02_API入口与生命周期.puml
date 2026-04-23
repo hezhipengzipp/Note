@@ -1,0 +1,20 @@
+@startuml 02_API入口与生命周期
+title SDK API 入口与生命周期
+
+start
+:App 启动;
+:RtcInit.initialize\n注入 RtcConfigData;
+:JanusVideoCallUseCase.init;
+:getUserMedia\n获取本地音频流;
+:createPeerConnection\n配置 ICE_SERVERS;
+:绑定事件\nonSignalingState / onConnectionState\nonIceCandidate / onIceGatheringState / onTrack;
+:addTrack 本地音频;
+:createDataChannel\nid=0 业务 / id=1 心跳;
+:SDK 就绪;
+split
+  :videoCall(cameraId);
+split again
+  :hangup / close;
+end split
+stop
+@enduml

@@ -1,0 +1,26 @@
+@startuml 08_超时与重试策略
+title 超时与重试策略总览
+
+skinparam componentStyle rectangle
+
+package "SSE 层" {
+  [初始连接 × 5\n每次间隔 3s] as S1
+  [onClose 延迟 500ms\n再判断是否需上报] as S2
+}
+
+package "Janus 信令层" {
+  [createSession 15s] as J1
+  [attachPlugin 15s] as J2
+  [registerUser 15s] as J3
+  [keepalive 每 10s] as J4
+}
+
+package "业务层" {
+  [_startCallingTimeoutTask\n每 5s 轮询 queryDeviceAcceptStatus\naccOn: 7 次 (35s)\naccOff: 3 次 (15s)] as B1
+  [_startWebrtcTimeoutTask\n8s 未 receiving → OTHER Webrtc Timeout] as B2
+}
+
+package "心跳层" {
+  [KeepAliveChannel\n每 2s 发心跳\n≥3 次无回应 → loading\n≥10 次 → 超时] as H1
+}
+@enduml

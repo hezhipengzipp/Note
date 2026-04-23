@@ -1,0 +1,17 @@
+@startuml 12_对外事件状态机
+title RtcInit.videoCallEvent 对外事件状态机
+
+[*] --> Idle
+Idle --> JanusInitialized : onAttached
+JanusInitialized --> Registered : EVENT registered
+Registered --> InCalling : EVENT calling
+InCalling --> Connecting : EVENT accepted\nsetRemoteDescription
+Connecting --> StreamOpen : onTrack\nstreamId==cameraId
+Connecting --> Connected : webrtcup
+StreamOpen --> Connected : webrtcup
+Connected --> DisConnected : 任意错误/挂断
+InCalling --> DisConnected : Calling Timeout / USER_REFUSE
+Connecting --> DisConnected : Webrtc Timeout
+Connected --> DisConnected : KeepAliveTimeout
+DisConnected --> [*]
+@enduml

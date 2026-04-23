@@ -1,0 +1,25 @@
+@startuml 10_媒体控制与业务消息
+title 媒体控制与业务消息
+
+start
+split
+  :switchMicrophone(enable);
+  :localStream.audioTracks.enabled=enable;
+  :_sendMicrophoneStateMessage;
+  :DataCommonResponseEntity\nid=1 type=2 MediaEnableEntity;
+  :sendDataChannelMessage\n通过 id=0 通道;
+split again
+  :switchVoice(cameraId, enable);
+  :remoteVideoMap[cameraId]\naudioTracks.enabled=enable;
+split again
+  :sendMessage(msg);
+  :sendDataChannelMessage;
+split again
+  :setOnMessageListener;
+  :接收 onChannelMessage;
+split again
+  :setOnDataChannelState;
+  :接收状态变化;
+end split
+stop
+@enduml

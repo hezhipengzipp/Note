@@ -1,0 +1,46 @@
+@startuml 09_错误码与DisConnected
+title 错误码与 DisConnected 事件来源
+
+skinparam componentStyle rectangle
+
+package "SSE 下发" {
+  [SSE_FORCE_NEW_TOKEN] as A1
+  [SSE_CALLING] as A2
+  [SSE_TIMEOUT\n已唤醒→INIT_FAILURE\n未唤醒→CALLEE_OFFLINE] as A3
+  [SSE_UNAUTHORIZED] as A4
+  [DEVICE_TOKEN_EXPIRED] as A5
+  [DEVICE_UNAUTHORIZED] as A6
+  [WAITING_TIMEOUT] as A7
+  [ANSWER_TIMEOUT] as A8
+  [WEBRTC_HANGUP] as A9
+  [USER_HANGUP → USER_REFUSE] as A10
+  [PHONE_CALLING] as A11
+}
+
+package "本地产生" {
+  [SSE Fail:code] as B1
+  [SSE RE-CONN FAIL] as B2
+  [SSE Close] as B3
+  [Calling Timeout] as B4
+  [Webrtc Timeout] as B5
+  [KeepAliveTimeout] as B6
+  [Janus Error: INIT_FAILURE] as B7
+  [JANUS_UNAUTHORIZED\n→ forceNewToken 重试] as B8
+}
+
+package "出口" {
+  [Rtc.videoCallEvent\nDisConnected(code,msg)] as X
+  [TrackManager\nDISCONNECT 埋点] as Y
+  [requestVideoCall\nforceNewToken:true] as Z
+}
+
+A1 --> X
+A3 --> X
+A10 --> X
+B1 --> X
+B4 --> X
+B5 --> X
+B6 --> X
+B8 --> Z
+X --> Y
+@enduml

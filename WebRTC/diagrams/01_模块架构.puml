@@ -1,0 +1,35 @@
+@startuml 01_模块架构
+title lib_flutter_video 模块架构
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+
+package "对外层" {
+  [RtcInit\nlib/core/rtc_init.dart] as RTC
+}
+package "业务层" {
+  [JanusVideoCallUseCase\nlib/janus/janus_video_call_usecase.dart] as UC
+}
+package "信令层" {
+  [JanusClient\nlib/janus/janus_client.dart] as JC
+  [WebSocketChannel\nlib/wss/web_socket_channel.dart] as WSC
+}
+package "媒体层" {
+  [RTCPeerConnection\nflutter_webrtc] as PC
+  [DataChannelHandler\nid=0 有序] as DC
+  [KeepAliveChannel\nid=1 无序] as KA
+}
+package "网络层" {
+  [SSE / EventFlux] as SSE
+  [HttpEngin\n挂断/状态查询] as HTTP
+}
+
+RTC --> UC
+UC --> JC
+UC --> PC
+UC --> DC
+UC --> KA
+UC --> SSE
+UC --> HTTP
+JC --> WSC
+@enduml

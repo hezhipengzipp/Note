@@ -1,0 +1,16 @@
+@startuml 06.2_重协商_UPDATE事件
+title 重协商 - EVENT UPDATE + jsep
+
+start
+partition "收到 EVENT UPDATE + jsep" {
+  if (jsep.type?) then (offer)
+    :setRemoteDescription;
+    :createAnswer;
+    :setLocalDescription;
+    :setOffer 上报 answer;
+  else (answer)
+    :setRemoteDescription;
+  endif
+}
+stop
+@enduml

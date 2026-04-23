@@ -1,0 +1,20 @@
+@startuml 07.1_心跳异常重协商
+title 心跳异常触发重协商
+
+participant "KeepAliveChannel" as KA
+participant "UseCase" as UC
+participant "RtcInit" as Rtc
+participant "PeerConnection" as PC
+participant "JanusClient" as JC
+
+KA -> KA : issueless≥10
+KA -> UC : onHeartbeatTimeout
+UC --> Rtc : DisConnected(OTHER, "KeepAliveTimeout")
+
+== 另一条路径: Socket 重连 ==
+UC -> UC : onSocketReopen
+UC -> PC : createOffer (restart)
+PC --> UC : offer
+UC -> JC : setOffer(offer)
+UC -> KA : resetStat / resumeAlive
+@enduml

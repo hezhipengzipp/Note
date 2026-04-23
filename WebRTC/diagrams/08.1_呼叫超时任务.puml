@@ -1,0 +1,25 @@
+@startuml 08.1_呼叫超时任务
+title _startCallingTimeoutTask 分支
+
+start
+repeat
+  :每 5s 触发;
+  :queryHangupStatus;
+  switch (status)
+  case ( USER_HANGUP )
+    :DisConnected(USER_REFUSE);
+    stop
+  case ( ≥ 0 )
+    :DisConnected(status);
+    stop
+  case ( -1 异常 )
+    if (剩余次数?) then (=0)
+      :DisConnected(OTHER, Calling Timeout);
+      stop
+    else (>0)
+      :继续等待;
+    endif
+  endswitch
+repeat while (仍在呼叫中)
+stop
+@enduml

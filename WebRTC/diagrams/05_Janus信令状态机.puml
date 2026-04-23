@@ -1,0 +1,31 @@
+@startuml 05_Janus信令状态机
+title Janus 信令状态机
+
+[*] --> Idle
+Idle --> Connecting : connect()
+Connecting --> SocketOpen : onOpen
+SocketOpen --> SessionCreating : createSession
+SessionCreating --> SessionReady : success\nstartKeepAlive(10s)
+SessionCreating --> ErrorState : 15s 超时\nINIT_FAILURE
+SessionReady --> PluginAttaching : attachPlugin(videocall)
+PluginAttaching --> PluginAttached : success → handleId
+PluginAttaching --> ErrorState : 15s 超时
+PluginAttached --> Registering : registerUser(localName)
+Registering --> Registered : EVENT registered
+Registering --> ErrorState : 15s 超时
+Registered --> Calling : call(offer, remoteName)
+Calling --> InCall : EVENT accepted + answer
+InCall --> WebRTCUp : webrtcup
+WebRTCUp --> MediaFlowing : media receiving:true
+MediaFlowing --> Hangup : hangup / peer hangup
+Hangup --> SessionDestroying : destroySession
+SessionDestroying --> [*]
+ErrorState --> [*]
+
+note right of SocketOpen
+  重连场景:
+  _sessionId 已存在 → claim
+  stat>1 → onSocketReopen
+  → restartOffer + resumeAlive
+end note
+@enduml

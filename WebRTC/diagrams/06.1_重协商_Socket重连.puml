@@ -1,0 +1,19 @@
+@startuml 06.1_重协商_Socket重连
+title 重协商 - Socket 重连触发
+
+start
+partition "Socket 重连" {
+  :onSocketReopen;
+  :_restartOffer;
+  if (_localRegistered?) then (否)
+    :跳过;
+    stop
+  else (是)
+    :createOffer;
+    :setLocalDescription;
+    :janusClient.setOffer\nbody.request=set;
+    :keepAliveChannel.resetStat;
+  endif
+}
+stop
+@enduml
