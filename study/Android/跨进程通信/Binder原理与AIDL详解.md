@@ -407,12 +407,18 @@ android.os.TransactionTooLargeException
                                         拿着 fd 去读共享内存里的 5MB 数据
 ```
 
-### 方案一：SharedMemory（共享内存，零拷贝，最推荐）
+### 方案一：SharedMemory（共享内存，零拷贝，API 27+ 最推荐）
+
+`android.os.SharedMemory` 是 **API 27+（Android 8.1+）** 才有的 Java/Kotlin API，不是 Android 10 才能用。  
+如果要兼容 Android 8.0 或更低版本，不能只暴露 `SharedMemory` 这一种返回值，需要准备 `ParcelFileDescriptor` 兜底方案。
 
 **AIDL 接口**
 
 ```aidl
+import android.os.SharedMemory;
+
 interface ILargeDataService {
+    // API 27+ 才调用
     SharedMemory getLargeData();
 }
 ```
@@ -548,6 +554,114 @@ fun fetchLargeData() {
                      Binder 只传了 readFd（几十字节）
 ```
 
+### 方案一的兼容写法：API 27+ 用 SharedMemory，低版本用 ParcelFileDescriptor
+
+如果业务希望“高版本零拷贝、低版本也能跑”，可以在 AIDL 里同时暴露两条通道：  
+
+- API 27+：返回 `SharedMemory`
+- API 26 及以下：返回 `ParcelFileDescriptor`
+
+下面示例用同一个 AIDL 演示分支逻辑。生产项目如果 `minSdk < 27` 且非常在意低版本类加载兼容性，更稳妥的做法是：基础 AIDL 只放 `ParcelFileDescriptor` 方法，`SharedMemory` 放到 API 27+ 才会使用的扩展接口或独立类里。
+
+**AIDL 接口**
+
+```aidl
+import android.os.ParcelFileDescriptor;
+import android.os.SharedMemory;
+
+interface ILargeDataService {
+    // API 27+ 使用，共享内存，适合大块内存数据
+    SharedMemory getLargeDataBySharedMemory();
+
+    // 全版本可用，低版本兜底；内部可以用管道或临时文件
+    ParcelFileDescriptor getLargeDataByFd();
+}
+```
+
+**服务端**
+
+```kotlin
+private val binder = object : ILargeDataService.Stub() {
+
+    override fun getLargeDataBySharedMemory(): SharedMemory {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
+            throw UnsupportedOperationException("SharedMemory requires API 27+")
+        }
+
+        val bytes = loadLargeData()
+        val sharedMemory = SharedMemory.create("large_data", bytes.size)
+
+        val buffer = sharedMemory.mapReadWrite()
+        buffer.put(bytes)
+        SharedMemory.unmap(buffer)
+
+        sharedMemory.setProtect(OsConstants.PROT_READ)
+        return sharedMemory
+    }
+
+    override fun getLargeDataByFd(): ParcelFileDescriptor {
+        val pipe = ParcelFileDescriptor.createPipe()
+        val readFd = pipe[0]
+        val writeFd = pipe[1]
+
+        thread {
+            ParcelFileDescriptor.AutoCloseOutputStream(writeFd).use { output ->
+                output.write(loadLargeData())
+            }
+        }
+
+        return readFd
+    }
+}
+```
+
+**客户端**
+
+```kotlin
+fun fetchLargeData(): ByteArray {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+        val sharedMemory = largeDataService.getLargeDataBySharedMemory()
+        val buffer = sharedMemory.mapReadOnly()
+
+        try {
+            ByteArray(buffer.remaining()).also { bytes ->
+                buffer.get(bytes)
+            }
+        } finally {
+            SharedMemory.unmap(buffer)
+            sharedMemory.close()
+        }
+    } else {
+        val readFd = largeDataService.getLargeDataByFd()
+
+        ParcelFileDescriptor.AutoCloseInputStream(readFd).use { input ->
+            input.readBytes()
+        }
+    }
+}
+```
+
+> 注意：如果项目 `minSdk < 27`，`SharedMemory` 相关代码必须用 `Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1` 包起来，或者放到只在 API 27+ 才会加载的类里。低版本统一走 `ParcelFileDescriptor`，不要在 Android 8.0 及以下调用 `SharedMemory.create()`、`mapReadOnly()` 等方法。
+
+### SharedMemory + ParcelFileDescriptor vs 纯 ParcelFileDescriptor
+
+一句话总结：`SharedMemory + ParcelFileDescriptor` 让高版本可以在不落盘的情况下直接创建共享内存块，实现真正的 mmap 跨进程共享；低版本再用 `ParcelFileDescriptor` 兜底。相比只使用文件型 `ParcelFileDescriptor`，它减少了文件系统开销，并且更适合随机读写、原地修改、反复读取的大块内存数据。
+
+需要注意：`ParcelFileDescriptor` 本身不只代表物理文件，也可以代表 pipe、socket 等 fd。下面的“纯 ParcelFileDescriptor”主要指常见的“临时文件 + ParcelFileDescriptor”方案；如果用的是 pipe，它也不需要落盘，但它更偏单向流式传输，不适合 mmap 后随机访问。
+
+| 维度 | 纯 ParcelFileDescriptor（文件型） | SharedMemory + ParcelFileDescriptor |
+|------|----------------------------------|-------------------------------------|
+| 数据来源 | 通常需要已有文件或先写入临时文件 | 任意内存数据，可动态创建 |
+| 数据持久化 | 是，数据会落盘 | 否，纯内存共享 |
+| 磁盘 I/O | 有读写开销 | 无文件系统读写开销 |
+| 隐私安全 | 临时文件可能残留，需要主动清理 | 随最后引用释放，进程结束后不残留文件 |
+| 随机访问 | 文件型支持 seek，pipe 不支持 | mmap 后可按位置访问 |
+| 双向通信 | 文件型可读写但同步复杂，pipe 通常单向 | 可读写，需自行做并发同步 |
+| 修改数据 | 通常要改文件内容或重建临时文件 | 可在共享内存中原地修改 |
+| 生命周期 | 文件生命周期需要自己管理 | 随 fd/对象引用关闭自动释放 |
+| 创建开销 | 中，涉及文件系统操作 | 低，主要是内存分配和 mmap |
+| 大数据性能 | 中等，受文件系统和拷贝影响 | 高，适合内存态大数据共享 |
+
 ### 方案三：ContentProvider
 
 ContentProvider 传输大数据时内部也是用的共享内存：
@@ -589,6 +703,7 @@ val fullData = outputStream.toByteArray()
 | 方案 | 性能 | 复杂度 | 数据大小限制 | 适用场景 |
 |------|------|--------|------------|---------|
 | **SharedMemory** | 最好（零拷贝） | 中 | 几乎无限 | 大块内存数据（API 27+） |
+| **SharedMemory + ParcelFileDescriptor 兼容封装** | 高版本最好，低版本好 | 中 | 几乎无限 | 需要兼容 Android 8.0 及以下 |
 | **Pipe** | 好 | 中 | 几乎无限 | 流式大数据 |
 | **ContentProvider** | 好 | 低 | 几乎无限 | 文件/结构化数据 |
 | **分块传输** | 差（多次 IPC） | 高 | 无限 | 兜底方案 |
