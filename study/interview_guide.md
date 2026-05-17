@@ -15,7 +15,7 @@
 | P0 必考 | Framework 原理 | [framework.md](framework.md) | 10年经验必问深度，AMS/WMS/Binder |
 | P1 重要 | Flutter | [flutter.md](flutter.md) | 跨平台能力加分项 |
 | P1 重要 | 网络与综合能力 | [comprehensive.md](comprehensive.md) | 网络、设计模式、算法、架构 |
-| P2 加分 | Kotlin 协程 | [kotlin.md](kotlin.md) | 已整理 |
+| P2 加分 | Kotlin 协程 | [kotlin.md](kotlin/kotlin_协程.md) | 已整理 |
 
 ---
 

@@ -199,7 +199,7 @@ val name: String by lazy { "default" }  // lazy 就是一种委托
 
 ### 6. 协程
 
-详见 [kotlin.md](kotlin.md)
+详见 [kotlin.md](kotlin/kotlin_协程.md)
 
 ### 7. Flow
 - **冷流**：只有收集时才执行，类似 RxJava 的 Observable
