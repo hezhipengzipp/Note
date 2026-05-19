@@ -41,7 +41,7 @@ Android / Flutter 面试知识点整理仓库。
 
 | 文档 |
 |------|
-| [Android / Flutter 架构分层](study/Architecture/Android_Flutter架构分层.md) · [MVP 与 MVVM 对比](study/Architecture/MVP与MVVM对比.md) |
+| [Android / Flutter 架构分层](study/Architecture/Android_Flutter架构分层.md) · [MVP 与 MVVM 对比](study/Architecture/MVP与MVVM对比.md) · [Flutter 即时通讯 IM 架构设计](study/Architecture/Flutter即时通讯IM架构设计.md) |
 
 ### Java
 
