@@ -27,6 +27,7 @@ Android / Flutter 面试知识点整理仓库。
 | **编译与模式** | [Debug / Release / Profile 模式对比](study/flutter/Debug与Release与Profile模式对比.md) · [JIT 与 AOT 编译对比](study/flutter/JIT与AOT编译对比.md) · [Dart VM 与 ART 的关系](study/flutter/DartVM与ART的关系.md) |
 | **异步** | [IO 异步与 await 原理](study/flutter/IO异步与await原理.md) · [阻塞 IO 与非阻塞 IO](study/flutter/阻塞IO与非阻塞IO对比.md) · [Microtask 与 Isolate](study/flutter/异步场景选择-Microtask与Isolate.md) · [Dart 与 Kotlin 与 JS 异步对比](study/flutter/Dart与Kotlin与JS异步对比.md) · [Socket 与上下层通信](study/flutter/Socket与上下层通信机制.md) |
 | **状态管理** | [Bloc 与 GetX 核心 API 速查](study/flutter/Flutter%20Bloc%20与%20GetX%20核心%20API%20速查.md) |
+| **第三方库** | [Provider 使用详解](study/flutter/第三方库框架原理/Provider使用详解.md) |
 | **泛型** | [Dart 与 Java 与 Kotlin 泛型对比](study/flutter/Dart与Java与Kotlin泛型对比.md) |
 | **工程** | [Mixin 使用与原理](study/flutter/Mixin使用与原理.md) · [part 与 import](study/flutter/part与import使用场景.md) · [扩展方法](study/flutter/扩展方法.md) · [屏幕适配方案](study/flutter/屏幕适配方案.md) · [混合开发方案](study/flutter/混合开发方案.md) · [原生与 Flutter 互相嵌入](study/flutter/原生与Flutter互相嵌入.md) · [多图下载并发设计](study/flutter/多图下载并发设计.md) |
 | **性能优化** | [性能优化总览](study/flutter/性能优化/Flutter性能优化总览.md) · [Widget 构建与重建优化](study/flutter/性能优化/Widget构建与重建优化.md) · [内存优化与泄漏排查](study/flutter/性能优化/内存优化与泄漏排查.md) · [列表性能优化](study/flutter/性能优化/列表性能优化.md) · [动画与渲染管线优化](study/flutter/性能优化/动画与渲染管线优化.md) · [图片加载与缓存优化](study/flutter/性能优化/图片加载与缓存优化.md) · [启动性能与包体积优化](study/flutter/性能优化/启动性能与包体积优化.md) · [DevTools 性能分析实战](study/flutter/性能优化/DevTools性能分析实战.md) |

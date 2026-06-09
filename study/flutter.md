@@ -130,7 +130,7 @@ createState() → initState() → didChangeDependencies() → build()
 |------|------|---------|
 | setState | 最简单，局部状态 | 单个 Widget 内 |
 | InheritedWidget | 数据向下传递 | Provider 底层原理 |
-| Provider | 官方推荐，InheritedWidget 封装 | 中小项目 |
+| Provider | 官方推荐，InheritedWidget 封装 | 中小项目，常配合 `ChangeNotifier` 使用 |
 | Riverpod | Provider 升级版，编译安全 | 中大项目 |
 | Bloc | 事件驱动，状态隔离清晰 | 大项目 |
 | GetX | 简洁但过于 magic | 快速开发 |
