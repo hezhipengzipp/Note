@@ -31,6 +31,7 @@ Android / Flutter 面试知识点整理仓库。
 | **泛型** | [Dart 与 Java 与 Kotlin 泛型对比](study/flutter/Dart与Java与Kotlin泛型对比.md) |
 | **工程** | [Mixin 使用与原理](study/flutter/Mixin使用与原理.md) · [part 与 import](study/flutter/part与import使用场景.md) · [扩展方法](study/flutter/扩展方法.md) · [屏幕适配方案](study/flutter/屏幕适配方案.md) · [混合开发方案](study/flutter/混合开发方案.md) · [原生与 Flutter 互相嵌入](study/flutter/原生与Flutter互相嵌入.md) · [多图下载并发设计](study/flutter/多图下载并发设计.md) |
 | **性能优化** | [性能优化总览](study/flutter/性能优化/Flutter性能优化总览.md) · [Widget 构建与重建优化](study/flutter/性能优化/Widget构建与重建优化.md) · [内存优化与泄漏排查](study/flutter/性能优化/内存优化与泄漏排查.md) · [列表性能优化](study/flutter/性能优化/列表性能优化.md) · [动画与渲染管线优化](study/flutter/性能优化/动画与渲染管线优化.md) · [图片加载与缓存优化](study/flutter/性能优化/图片加载与缓存优化.md) · [启动性能与包体积优化](study/flutter/性能优化/启动性能与包体积优化.md) · [DevTools 性能分析实战](study/flutter/性能优化/DevTools性能分析实战.md) |
+| **故障排查** | [Flutter 白屏原因与排查](study/flutter/Flutter白屏原因与排查.md) |
 
 ### Framework
 
@@ -87,7 +88,7 @@ Android / Flutter 面试知识点整理仓库。
 
 | 文档 |
 |------|
-| [Hot100 目录](study/Algorithm/Hot100/README.md) —— 数组/哈希、滑动窗口、链表、二叉树等分类刷题记录 |
+| [Hot100 目录](study/Algorithm/Hot100/README.md) · [常见算法解题套路速记](study/Algorithm/常见算法解题套路速记.md) · [常见排序算法](study/Algorithm/常见排序算法.md) |
 
 ### WebRTC
 
