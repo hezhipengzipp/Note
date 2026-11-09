@@ -1,6 +1,6 @@
 # Note
 
-Android / Flutter 面试知识点整理仓库。
+Android、Flutter 及相关技术的学习笔记和面试知识点索引。
 
 ---
 
@@ -23,13 +23,13 @@ Android / Flutter 面试知识点整理仓库。
 
 | 分类 | 文档 |
 |------|------|
-| **核心原理** | [三棵树原理与逻辑关系](study/flutter/三棵树原理与逻辑关系.md) · [三棵树面试深度解析](study/flutter/三棵树面试深度解析.md) · [单线程模型与 EventLoop](study/flutter/单线程模型与EventLoop.md) · [Future 原理](study/flutter/Future原理详解.md) · [PlatformChannel 底层原理](study/flutter/PlatformChannel底层原理.md) · [TaskRunner 工作原理](study/flutter/TaskRunner工作原理.md) · [Flutter 架构](study/flutter/flutter架构.md) · [Sliver 详解](study/flutter/Sliver详解.md) |
+| **核心原理** | [三棵树原理与逻辑关系](study/flutter/三棵树原理与逻辑关系.md) · [三棵树面试深度解析](study/flutter/三棵树面试深度解析.md) · [单线程模型与 EventLoop](study/flutter/单线程模型与EventLoop.md) · [Future 原理](study/flutter/Future原理详解.md) · [Future 与 Completer 使用指南](study/flutter/Future_Completer使用指南.md) · [IsolateNameServer 注册与查找](study/flutter/IsolateNameServer注册查找流程.md) · [PlatformChannel 底层原理](study/flutter/PlatformChannel底层原理.md) · [TaskRunner 工作原理](study/flutter/TaskRunner工作原理.md) · [Flutter 架构](study/flutter/flutter架构.md) · [Sliver 详解](study/flutter/Sliver详解.md) |
 | **编译与模式** | [Debug / Release / Profile 模式对比](study/flutter/Debug与Release与Profile模式对比.md) · [JIT 与 AOT 编译对比](study/flutter/JIT与AOT编译对比.md) · [Dart VM 与 ART 的关系](study/flutter/DartVM与ART的关系.md) |
 | **异步** | [IO 异步与 await 原理](study/flutter/IO异步与await原理.md) · [阻塞 IO 与非阻塞 IO](study/flutter/阻塞IO与非阻塞IO对比.md) · [Microtask 与 Isolate](study/flutter/异步场景选择-Microtask与Isolate.md) · [Dart 与 Kotlin 与 JS 异步对比](study/flutter/Dart与Kotlin与JS异步对比.md) · [Socket 与上下层通信](study/flutter/Socket与上下层通信机制.md) |
 | **状态管理** | [Bloc 与 GetX 核心 API 速查](study/flutter/Flutter%20Bloc%20与%20GetX%20核心%20API%20速查.md) |
-| **第三方库** | [Provider 使用详解](study/flutter/第三方库框架原理/Provider使用详解.md) |
+| **第三方库** | [Provider 使用详解](study/flutter/第三方库框架原理/Provider使用详解.md) · [drift 使用详解](study/flutter/第三方库框架原理/drift使用详解.md) |
 | **泛型** | [Dart 与 Java 与 Kotlin 泛型对比](study/flutter/Dart与Java与Kotlin泛型对比.md) |
-| **工程** | [Mixin 使用与原理](study/flutter/Mixin使用与原理.md) · [part 与 import](study/flutter/part与import使用场景.md) · [扩展方法](study/flutter/扩展方法.md) · [屏幕适配方案](study/flutter/屏幕适配方案.md) · [混合开发方案](study/flutter/混合开发方案.md) · [原生与 Flutter 互相嵌入](study/flutter/原生与Flutter互相嵌入.md) · [多图下载并发设计](study/flutter/多图下载并发设计.md) |
+| **工程** | [Mixin 使用与原理](study/flutter/Mixin使用与原理.md) · [part 与 import](study/flutter/part与import使用场景.md) · [扩展方法](study/flutter/扩展方法.md) · [屏幕适配方案](study/flutter/屏幕适配方案.md) · [混合开发方案](study/flutter/混合开发方案.md) · [原生与 Flutter 互相嵌入](study/flutter/原生与Flutter互相嵌入.md) · [多图下载并发设计](study/flutter/多图下载并发设计.md) · [固定并发数控制](study/flutter/并发请求控制-固定并发数.md) · [登录状态事件分发](study/flutter/一对多事件分发-登录状态同步.md) · [Flutter Plugin 使用详解](study/flutter/FlutterPlugin使用详解.md) · [Melos 多包仓库实践](study/flutter/Melos多包仓库最佳实践方案.md) |
 | **性能优化** | [性能优化总览](study/flutter/性能优化/Flutter性能优化总览.md) · [Widget 构建与重建优化](study/flutter/性能优化/Widget构建与重建优化.md) · [内存优化与泄漏排查](study/flutter/性能优化/内存优化与泄漏排查.md) · [列表性能优化](study/flutter/性能优化/列表性能优化.md) · [动画与渲染管线优化](study/flutter/性能优化/动画与渲染管线优化.md) · [图片加载与缓存优化](study/flutter/性能优化/图片加载与缓存优化.md) · [启动性能与包体积优化](study/flutter/性能优化/启动性能与包体积优化.md) · [DevTools 性能分析实战](study/flutter/性能优化/DevTools性能分析实战.md) |
 | **故障排查** | [Flutter 白屏原因与排查](study/flutter/Flutter白屏原因与排查.md) |
 
@@ -50,7 +50,7 @@ Android / Flutter 面试知识点整理仓库。
 | 分类 | 文档 |
 |------|------|
 | **集合** | [HashMap 原理](study/Java/HashMap原理详解.md) · [常用数据结构原理大全](study/Java/Java常用数据结构原理大全.md) |
-| **并发** | [Java 锁原理](study/Java/Java锁原理.md) · [线程池](study/Java/线程池详解与最佳实践.md) · [大文件多线程下载与线程池设计](study/Java/大文件多线程下载与线程池设计.md) · [并发工具类](study/Java/并发工具类CountDownLatch_CyclicBarrier_Semaphore.md) · [NIO](study/Java/Java非阻塞IO(NIO).md) |
+| **并发** | [Java 锁原理](study/Java/Java锁原理.md) · [线程池](study/Java/线程池详解与最佳实践.md) · [大文件多线程下载与线程池设计](study/Java/大文件多线程下载与线程池设计.md) · [并发工具类](study/Java/并发工具类CountDownLatch_CyclicBarrier_Semaphore.md) · [NIO](study/Java/Java非阻塞IO%28NIO%29.md) |
 | **JVM** | [JVM 内存模型与垃圾回收](study/Java/JVM内存模型与垃圾回收.md) |
 | **泛型** | [Java 泛型详解](study/Java/Java泛型详解.md) |
 
@@ -58,7 +58,7 @@ Android / Flutter 面试知识点整理仓库。
 
 | 文档 |
 |------|
-| [Kotlin 泛型型变 (out/in)](study/kotlin/Kotlin泛型型变(out与in).md) · [Kotlin 内联类](study/kotlin/Kotlin内联类.md) · [Kotlin 协程](study/kotlin/kotlin_协程.md) |
+| [Kotlin 泛型型变 (out/in)](study/kotlin/Kotlin泛型型变%28out与in%29.md) · [Kotlin 内联类](study/kotlin/Kotlin内联类.md) · [Kotlin 协程](study/kotlin/kotlin_协程.md) · [协程手动完成控制](study/kotlin/协程手动完成控制.md) |
 
 ### React
 
@@ -100,10 +100,16 @@ Android / Flutter 面试知识点整理仓库。
 
 | 文档 |
 |------|
-| [SystemUI 开发指南](SystemUi/Android_SystemUI_Development_Guide.md) · [SystemUI 概述](SystemUi/SystemUI.md) · [App 调用 SystemUI 快速入门](SystemUi/App_To_SystemUI_Quick_Start_Guide.md) · [StatusBar 模块](SystemUi/statusbar-module.md) · [NavigationBar 模块](SystemUi/m1-navigationbar-module.md) · [Notification 模块](SystemUi/notification-module.md) · [QS 模块](SystemUi/qs-module.md) · [下拉视图模块](SystemUi/pulldownview-module.md) · [项目指南](SystemUi/project-guide.md) |
+| [SystemUI 开发指南](SystemUi/Android_SystemUI_Development_Guide.md) · [SystemUI 概述](SystemUi/SystemUI.md) · [App 调用 SystemUI 快速入门](SystemUi/App_To_SystemUI_Quick_Start_Guide.md) · [StatusBar 模块](SystemUi/statusbar-module.md) · [NavigationBar 模块](SystemUi/m1-navigationbar-module.md) · [Notification 模块](SystemUi/notification-module.md) · [QS 模块](SystemUi/qs-module.md) · [下拉视图模块](SystemUi/pulldownview-module.md) · [项目指南](SystemUi/project-guide.md) · [SystemUI 与 Linux 开发手册](SystemUi/systemGit.md) |
 
 ### 面试速查
 
 | 文档 |
 |------|
 | [面试指南](study/interview_guide.md) · [Android 综合](study/android.md) · [Framework 综合](study/framework.md) · [Java/Kotlin 综合](study/java_kotlin.md) · [Flutter 综合](study/flutter.md) · [综合](study/comprehensive.md) |
+
+### 其他
+
+| 文档 |
+|------|
+| [VPS 部署与配置速查](vps.md) |
